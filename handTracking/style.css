@@ -1,0 +1,26 @@
+body{
+  margin: 0;
+  padding: 0;
+  background-color: rgb(27,28,32);
+}
+
+#app{
+  display: flex;
+  align-items: center;
+  height: 100vh;
+  position: relative;
+}
+
+#video{
+  margin: auto;
+  scale: -1 1;
+  /* height: 100%; */
+}
+
+#overlay{
+  scale: -1 1;
+  position: absolute;
+  left: 50vw;
+  top: 50vh;
+  translate: -50% -50%;
+}

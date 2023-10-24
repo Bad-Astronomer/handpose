@@ -1,5 +1,5 @@
 {
-  "name": "handpose",
+  "name": "handtracking",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,12 +10,5 @@
   },
   "devDependencies": {
     "vite": "^4.3.9"
-  },
-  "dependencies": {
-    "@mediapipe/hands": "^0.4.1675469240",
-    "@tensorflow-models/hand-pose-detection": "^2.0.1",
-    "@tensorflow/tfjs-backend-webgl": "^4.11.0",
-    "@tensorflow/tfjs-converter": "^4.11.0",
-    "@tensorflow/tfjs-core": "^4.11.0"
   }
 }

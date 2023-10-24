@@ -2,6 +2,9 @@ body{
   margin: 0;
   padding: 0;
   background-color: rgb(27,28,32);
+
+  /* !TEMP */
+  overflow: hidden;
 }
 
 #app{
@@ -12,10 +15,21 @@ body{
   width: fit-content;
   margin: auto;
   flex-direction: column;
-
-  /* !TEMP */
-  overflow: hidden;
 }
+
+@media (max-height: 940px) {
+  #app {
+      flex-direction: row;
+  }
+
+  @media (max-width: 1280px) {
+    #app {
+        flex-direction: column;
+    }
+  }
+}
+
+
 
 #video-container{
   position: relative;

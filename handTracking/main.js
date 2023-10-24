@@ -1,14 +1,14 @@
 const video = document.getElementById("video");
-const canvas = document.getElementById("overlay");
-const ctx = canvas.getContext("2d");
+const overlay = document.getElementById("overlay");
+const ctx = overlay.getContext("2d");
 
 const size = {
     height: video.getAttribute("height"),
     width:  video.getAttribute("width")
 }
 
-canvas.width = size.width;
-canvas.height = size.height;
+overlay.width = size.width;
+overlay.height = size.height;
 
 const connections = [
     [0, 1], [1, 2], [2, 3], [3, 4],   // Thumb
@@ -45,7 +45,7 @@ video.onloadeddata = function() {
         // const predictions = await model.estimateHands(video, true); // true: flipHorizontal
         const estimationConfig = {flipHorizontal: true};
         const predictions = await detector.estimateHands(video, estimationConfig);
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, overlay.width, overlay.height);
         
         if (predictions.length){
             predictions.forEach((hand) => {
@@ -88,3 +88,30 @@ video.onloadeddata = function() {
 
     predict();
 }
+
+import * as THREE from 'three';
+
+const viewport = document.getElementById("viewport")
+
+let scene = new THREE.Scene();
+
+let camera = new THREE.PerspectiveCamera(75, 640 / 480, 0.1, 1000);
+camera.position.z = 5;
+
+let renderer = new THREE.WebGLRenderer({ canvas: viewport, antialias: true });
+renderer.setSize(640, 480);
+
+let geometry = new THREE.BoxGeometry(1, 1, 1);
+let material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+
+let cube = new THREE.Mesh(geometry, material);
+
+scene.add(cube);
+
+function animate() {
+    requestAnimationFrame(animate);
+    cube.rotation.x += 0.01;
+    cube.rotation.y += 0.01;
+    renderer.render(scene, camera);
+}
+animate();

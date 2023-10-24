@@ -33,10 +33,11 @@ viewportStats.dom.style.position = "absolute";
 let landmarks = [];
 let keypoints3D = [];
 
+let color = "aqua";
 for(let i = 0; i < 21; i++){
   let sphere = new THREE.Mesh(
     new THREE.SphereGeometry(0.05, 16, 16),
-    new THREE.MeshBasicMaterial({ color: 0xe1f5d1 })
+    new THREE.MeshBasicMaterial({ color: color })
   );
 
   scene.add(sphere);
@@ -64,7 +65,7 @@ connections.forEach((connection, index) => {
 })
 
 
-
+//* 2D video overlay
 const video = document.getElementById("video");
 const overlay = document.getElementById("overlay");
 const ctx = overlay.getContext("2d");
@@ -78,18 +79,14 @@ overlay.width = size.width;
 overlay.height = size.height;
 
 
-
+//* hand-pose-detection model
 const model = handPoseDetection.SupportedModels.MediaPipeHands;
 const detectorConfig = {
     runtime: 'mediapipe', // or 'tfjs',
     solutionPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/hands',
     modelType: 'full'
 }
-
 const detector = await handPoseDetection.createDetector(model, detectorConfig);
-
-let color = "aqua";
-
 
 navigator.mediaDevices.getUserMedia({video: true})
     .then((stream) => {
@@ -98,56 +95,49 @@ navigator.mediaDevices.getUserMedia({video: true})
     }
 );
 
-
 video.onloadeddata = function() {
     async function predict() {
-        // const predictions = await model.estimateHands(video, true); // true: flipHorizontal
         const estimationConfig = {flipHorizontal: true};
         const predictions = await detector.estimateHands(video, estimationConfig);
+
         ctx.clearRect(0, 0, overlay.width, overlay.height);
         
         if (predictions.length){
             predictions.forEach((hand) => {
-
-                if(hand.handedness == "Left"){
-                    color = "red";
-                }
-                else{
-                    color = "aqua";
-                }
-
+                //* Color
+                hand.handedness == "Left" ? color = "red" : color = "aqua";
+                
+                //* Joints / Keypoints          
                 let keypoints = hand.keypoints;
+                keypoints3D = hand.keypoints3D;
 
-                //* Joints / Keypoints
-                for (let j = 0; j < keypoints.length; j++) {
-                    const {x, y} = keypoints[j];
-                    ctx.beginPath();
-                    ctx.arc(x, y, 5, 0, 2 * Math.PI);
-                    ctx.fillStyle = color;
-                    ctx.fill();
-                }
+                keypoints3D.forEach((keypoint, index) => {
+                  // 3D
+                  let {x, y, z} = keypoint;
+                  landmarks[index].position.copy(new THREE.Vector3(x*10, y*-10, z*-10));
+                  landmarks[index].material.color.set(color);
+
+                  // 2D
+                  ({x, y} = keypoints[index])
+                  ctx.beginPath();
+                  ctx.arc(x , y, 5, 0, 2 * Math.PI);
+                  ctx.fillStyle = color;
+                  ctx.fill();
+                })
 
                 //* Skeleton lines
-                connections.forEach(([startIdx, endIdx]) => {
-                    ctx.beginPath();
-                    ctx.moveTo(keypoints[startIdx].x, keypoints[startIdx].y);
-                    ctx.lineTo(keypoints[endIdx].x, keypoints[endIdx].y);
-                    ctx.strokeStyle = 'white';
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-                });
-
-                keypoints3D = hand.keypoints3D;
-                keypoints3D.forEach((keypoint, index) => {
-                  let {x, y, z} = keypoint;
-                  landmarks[index].position.copy(new THREE.Vector3(x*10, y*-10, z*-10))
-                })
-                
-                // console.log(keypoints3D);
                 connections.forEach((connection, index) => {
+                  // 3D
                   landmark_connections[index].geometry.setFromPoints([landmarks[connection[0]].position, landmarks[connection[1]].position]);
-                })
-                
+
+                  // 2D
+                  ctx.beginPath();
+                  ctx.moveTo(keypoints[connection[0]].x, keypoints[connection[0]].y);
+                  ctx.lineTo(keypoints[connection[1]].x, keypoints[connection[1]].y);
+                  ctx.strokeStyle = 'white';
+                  ctx.lineWidth = 2;
+                  ctx.stroke();
+                });
             })
         }
         renderer.render(scene, camera);

@@ -1,4 +1,4 @@
-# handpose
+# Handpose
 
 ## First Install for blender model loader  
 
